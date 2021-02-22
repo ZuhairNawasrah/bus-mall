@@ -1,4 +1,5 @@
 'use strict';
+//----------------------------------------------initiateSomeVariables-----------------------------------------------//
 const names = ['banana', 'bathroom', 'boots', 'breakfast', 'bubblegum', 'chair', 'cthulhu', 'dog-duck', 'dragon', 'pen', 'pet-sweep', 'scissors', 'shark', 'sweep', 'tauntaun', 'unicorn', 'usb', 'water-can', 'wine-glass'];
 const ext = ['jpg', 'jpg', 'jpg', 'jpg', 'jpg', 'jpg', 'jpg', 'jpg', 'jpg', 'jpg', 'jpg', 'jpg', 'jpg', 'png', 'jpg', 'jpg', 'gif', 'jpg', 'jpg'];
 const left = document.getElementById('left');
@@ -10,15 +11,15 @@ let listenStop = 0;
 let preLeftIndex;
 let preMiddleIndex;
 let preRightIndex;
-//------------------------------------------init------------------------------------------------//
 function randomNo(min, max) {
   return (Math.floor(Math.random() * (max - min + 1) + min));
 }
+//---------------------------------------constructorFunction_createNewObjects---------------------------------------//
 function BusMall(name, ext) {
   this.name = name;
   this.path = `./images/${name}.${ext}`;
   this.votes = 0;
-  this.showTimes = 0;
+  this.views = 0;
   this.avgLikes = 0;
   BusMall.items.push(this);
 }
@@ -26,7 +27,7 @@ for (let i = 0; i < names.length; i++) {
   new BusMall(names[i], ext[i]);
 }
 console.log(BusMall.items);
-//---------------------------------------addListener-------------------------------------------//
+//---------------------------------------------------addListener----------------------------------------------------//
 sec.addEventListener('click', product);
 function product(event) {
   if (event.target.id !== 'sec') {
@@ -40,7 +41,7 @@ function product(event) {
       sec.removeEventListener('click', product);
       rendChart();
       for (let i = 0; i < BusMall.items.length; i++) {
-        BusMall.items[i].avgLikes = `${Math.floor((BusMall.items[i].votes / BusMall.items[i].showTimes) * 100)}%`;
+        BusMall.items[i].avgLikes = `${Math.floor((BusMall.items[i].votes / BusMall.items[i].views) * 100)}%`;
       }
       results();
     } else {
@@ -48,25 +49,55 @@ function product(event) {
     }
   }
 }
-//-----------------------------------renderFunction-----------------------------------------//
+//--------------------------------------------------renderFunction--------------------------------------------------//
 function render() {
+  //-----------------------------------------------leftIndexGenerator-----------------------------------------------//
   let leftIndex = randomNo(0, BusMall.items.length - 1);
-  while (leftIndex === preLeftIndex || leftIndex === preMiddleIndex || leftIndex === preRightIndex) {
-    leftIndex = randomNo(0, BusMall.items.length - 1);
+  loopOne: while (names) {
+    switch (leftIndex) {
+    case preLeftIndex:
+    case preMiddleIndex:
+    case preRightIndex:
+      leftIndex = randomNo(0, BusMall.items.length - 1);
+      break;
+    default:
+      break loopOne;
+    }
   }
   left.src = BusMall.items[leftIndex].path;
   left.title = BusMall.items[leftIndex].name;
   left.alt = BusMall.items[leftIndex].name;
+  //----------------------------------------------middleIndexGenerator----------------------------------------------//
   let middleIndex = randomNo(0, BusMall.items.length - 1);
-  while (middleIndex === leftIndex || middleIndex === preLeftIndex || middleIndex === preMiddleIndex || middleIndex === preRightIndex) {
-    middleIndex = randomNo(0, BusMall.items.length - 1);
+  loopTwo: while (names) {
+    switch (middleIndex) {
+    case leftIndex:
+    case preLeftIndex:
+    case preMiddleIndex:
+    case preRightIndex:
+      middleIndex = randomNo(0, BusMall.items.length - 1);
+      break;
+    default:
+      break loopTwo;
+    }
   }
   middle.src = BusMall.items[middleIndex].path;
   middle.title = BusMall.items[middleIndex].name;
   middle.alt = BusMall.items[middleIndex].name;
+  //----------------------------------------------rightIndexGenerator-----------------------------------------------//
   let rightIndex = randomNo(0, BusMall.items.length - 1);
-  while (rightIndex === leftIndex || rightIndex === middleIndex || rightIndex === preLeftIndex || rightIndex === preMiddleIndex || rightIndex === preRightIndex) {
-    rightIndex = randomNo(0, BusMall.items.length - 1);
+  loopThree: while (names) {
+    switch (rightIndex) {
+    case leftIndex:
+    case preLeftIndex:
+    case middleIndex:
+    case preMiddleIndex:
+    case preRightIndex:
+      rightIndex = randomNo(0, BusMall.items.length - 1);
+      break;
+    default:
+      break loopThree;
+    }
   }
   right.src = BusMall.items[rightIndex].path;
   right.title = BusMall.items[rightIndex].name;
@@ -74,12 +105,13 @@ function render() {
   preLeftIndex = leftIndex;
   preMiddleIndex = middleIndex;
   preRightIndex = rightIndex;
+  //------------------------------------------------viewsCalculating------------------------------------------------//
   for (let i = 0; i < BusMall.items.length; i++) {
     switch (i) {
     case leftIndex:
     case middleIndex:
     case rightIndex:
-      BusMall.items[i].showTimes++;
+      BusMall.items[i].views++;
       break;
     default:
       break;
@@ -87,16 +119,17 @@ function render() {
   }
 }
 render();
-
+//------------------------------------------------briefDataStructure------------------------------------------------//
 function results() {
   const ulEl = document.createElement('ul');
   sec.appendChild(ulEl);
   for (let i = 0; i < BusMall.items.length; i++) {
     const liEl = document.createElement('li');
     ulEl.appendChild(liEl);
-    liEl.textContent = `${BusMall.items[i].name.toUpperCase()} had ${BusMall.items[i].votes} votes, and was shown ${BusMall.items[i].showTimes} times....it's liked by ${BusMall.items[i].avgLikes}`;
+    liEl.textContent = `${BusMall.items[i].name.toUpperCase()} had ${BusMall.items[i].votes} votes, and was shown ${BusMall.items[i].views} times....it's liked by ${BusMall.items[i].avgLikes}`;
   }
 }
+//-----------------------------------------------chartOfDataStructure-----------------------------------------------//
 function rendChart() {
   const ctx=document.getElementById('chart').getContext('2d');
   const names=[];
@@ -106,7 +139,7 @@ function rendChart() {
   for (let i = 0; i < BusMall.items.length; i++) {
     names.push(BusMall.items[i].name);
     votes.push(BusMall.items[i].votes);
-    shown.push(BusMall.items[i].showTimes);
+    shown.push(BusMall.items[i].views);
     avg.push(BusMall.items[i].avgLikes*100);
   }
   new Chart(ctx, {
