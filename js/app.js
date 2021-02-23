@@ -6,8 +6,11 @@ const left = document.getElementById('left');
 const middle = document.getElementById('middle');
 const right = document.getElementById('right');
 const sec = document.getElementById('section');
-BusMall.items = [];
 let listenStop = 0;
+let customerVote=0;
+console.log(BusMall.items);
+console.log(localStorage);
+BusMall.items = [];
 let preLeftIndex;
 let preMiddleIndex;
 let preRightIndex;
@@ -26,6 +29,9 @@ function BusMall(name, ext) {
 for (let i = 0; i < names.length; i++) {
   new BusMall(names[i], ext[i]);
 }
+if(localStorage.length>0){
+  BusMall.items=JSON.parse(localStorage.getItem('votes/views'));
+}
 console.log(BusMall.items);
 //---------------------------------------------------addListener----------------------------------------------------//
 sec.addEventListener('click', product);
@@ -43,7 +49,8 @@ function product(event) {
       for (let i = 0; i < BusMall.items.length; i++) {
         BusMall.items[i].avgLikes = `${Math.floor((BusMall.items[i].votes / BusMall.items[i].views) * 100)}%`;
       }
-      results();
+      localStorage.setItem('votes/views',JSON.stringify(BusMall.items));
+      convert();
     } else {
       render();
     }
@@ -115,14 +122,16 @@ function render() {
       break;
     default:
       break;
-    }
-  }
-}
+    }}}
 render();
 //------------------------------------------------briefDataStructure------------------------------------------------//
-function results() {
-  const ulEl = document.createElement('ul');
+function list() {
+  customerVote++;
+  const ulEl=document.createElement('ul');
   sec.appendChild(ulEl);
+  const liEl = document.createElement('li');
+  ulEl.appendChild(liEl);
+  liEl.textContent =`Final results after customer No.${customerVote} vote.`;
   for (let i = 0; i < BusMall.items.length; i++) {
     const liEl = document.createElement('li');
     ulEl.appendChild(liEl);
@@ -131,30 +140,30 @@ function results() {
 }
 //-----------------------------------------------chartOfDataStructure-----------------------------------------------//
 function rendChart() {
-  const ctx=document.getElementById('chart').getContext('2d');
-  const names=[];
-  const votes=[];
-  const shown=[];
-  const avg=[];
+  const ctx = document.getElementById('chart').getContext('2d');
+  const names = [];
+  const votes = [];
+  const shown = [];
+  const avg = [];
   for (let i = 0; i < BusMall.items.length; i++) {
     names.push(BusMall.items[i].name);
     votes.push(BusMall.items[i].votes);
     shown.push(BusMall.items[i].views);
-    avg.push(BusMall.items[i].avgLikes*100);
+    avg.push(BusMall.items[i].avgLikes * 100);
   }
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels:names,
+      labels: names,
       datasets: [{
-        label:'votes#',
+        label: 'votes#',
         barPercentage: 0.5,
         barThickness: 10,
         maxBarThickness: 8,
         minBarLength: 2,
         data: votes
-      },{
-        label:'views#',
+      }, {
+        label: 'views#',
         barPercentage: 0.5,
         barThickness: 20,
         maxBarThickness: 8,
@@ -171,4 +180,15 @@ function rendChart() {
         }]
       }
     }
-  });}
+  });
+}
+//---------------------------------------------------localStorage---------------------------------------------------//
+function convert() {
+  if(localStorage.length>0){
+    BusMall.items=JSON.parse(localStorage.getItem('votes/views'));
+    console.log(BusMall.items);
+    list();
+    listenStop=0;
+    sec.addEventListener('click', product);
+  }
+}
